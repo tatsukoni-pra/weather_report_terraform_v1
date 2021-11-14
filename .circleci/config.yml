@@ -39,7 +39,8 @@ commands:
             sh ./bin/assume-role.sh
             source aws-env.sh
             cd ./src/tf
-            terraform plan
+            rm -f plan.out
+            terraform plan -out=plan.out
   apply:
     steps:
       - run:
@@ -48,7 +49,7 @@ commands:
             sh ./bin/assume-role.sh
             source aws-env.sh
             cd ./src/tf
-            terraform apply -auto-approve
+            terraform apply -auto-approve plan.out
 
 jobs:
   checkout:
@@ -87,6 +88,10 @@ jobs:
           at: .
       - install_awscli
       - plan
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
   apply:
     executor: 
       name: default

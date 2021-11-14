@@ -87,6 +87,14 @@ jobs:
           at: .
       - install_awscli
       - plan
+  apply:
+    executor: 
+      name: default
+    steps:
+      - attach_workspace:
+          at: .
+      - install_awscli
+      - apply
 
 workflows:
   version: 2

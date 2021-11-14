@@ -15,15 +15,23 @@ commands:
             apk --update-cache add python3 py3-pip alpine-sdk
             sudo pip3 install awscli --upgrade
             sudo aws --version
-  init_and_validate:
+  init:
+    steps:
+      - run:
+          name: terraform init
+          command: |
+            sh ./bin/assume-role.sh
+            source aws-env.sh
+            cd ./src/tf
+            terraform init -input=false
+  validate:
     steps:
       - run:
           name: terraform validate
           command: |
             cd ./src/tf
-            terraform init -backend=false
             terraform validate
-  init_and_plan:
+  plan:
     steps:
       - run:
           name: terraform plan
@@ -31,29 +39,66 @@ commands:
             sh ./bin/assume-role.sh
             source aws-env.sh
             cd ./src/tf
-            terraform init -input=false
             terraform plan
+  apply:
+    steps:
+      - run:
+          name: terraform apply
+          command: |
+            sh ./bin/assume-role.sh
+            source aws-env.sh
+            cd ./src/tf
+            terraform apply -auto-approve
 
 jobs:
+  checkout:
+    executor: 
+      name: default
+    steps:
+      - checkout
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  init:
+    executor: 
+      name: default
+    steps:
+      - attach_workspace:
+          at: .
+      - install_awscli
+      - init
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
   validate:
     executor: 
       name: default
     steps:
-      - checkout
-      - init_and_validate
+      - attach_workspace:
+          at: .
+      - validate
   plan:
     executor: 
       name: default
     steps:
-      - checkout
+      - attach_workspace:
+          at: .
       - install_awscli
-      - init_and_plan
+      - plan
 
 workflows:
   version: 2
-  push:
+  build:
     jobs:
-      - validate
+      - checkout
+      - init:
+          requires:
+            - checkout
+      - validate:
+          requires:
+            - init
       - plan:
           requires:
             - validate

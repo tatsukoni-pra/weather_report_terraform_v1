@@ -104,3 +104,19 @@ workflows:
           requires:
             - validate
           context: TERRAFORM-CI-DEMO
+      - hold_apply:
+          requires:
+            - plan
+          type: approval
+          filters:
+            branches:
+              only:
+                - "main"
+      - apply:
+          requires:
+            - hold_apply
+          context: TERRAFORM-CI-DEMO
+          filters:
+            branches:
+              only:
+                - "main"

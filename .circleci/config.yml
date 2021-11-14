@@ -96,6 +96,7 @@ workflows:
       - init:
           requires:
             - checkout
+          context: TERRAFORM-CI-DEMO
       - validate:
           requires:
             - init

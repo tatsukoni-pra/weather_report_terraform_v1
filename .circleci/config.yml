@@ -6,6 +6,15 @@ executors:
       - image: hashicorp/terraform:0.14.10
 
 commands:
+  install_awscli:
+    steps:
+      - run:
+          name: install_awscli
+          command: |
+            apk add sudo jq 
+            apk --update-cache add python3 py3-pip alpine-sdk
+            sudo pip3 install awscli --upgrade
+            sudo aws --version
   init_and_validate:
     steps:
       - run:
@@ -19,6 +28,8 @@ commands:
       - run:
           name: terraform plan
           command: |
+            sh ./bin/assume-role.sh
+            source aws-env.sh
             cd ./src/tf
             terraform init -input=false
             terraform plan
@@ -35,6 +46,7 @@ jobs:
       name: default
     steps:
       - checkout
+      - install_awscli
       - init_and_plan
 
 workflows:
@@ -45,3 +57,4 @@ workflows:
       - plan:
           requires:
             - validate
+          context: TERRAFORM-CI-DEMO

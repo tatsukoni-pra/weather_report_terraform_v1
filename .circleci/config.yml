@@ -108,7 +108,9 @@ workflows:
   build:
     jobs:
       - checkout_code
-      - validate
+      - validate:
+          requires:
+            - checkout_code
       - int_and_plan:
           requires:
             - validate

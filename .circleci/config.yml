@@ -9,29 +9,28 @@ commands:
   install_awscli:
     steps:
       - run:
-          name: install_awscli
+          name: install awscli
           command: |
             apk add sudo jq 
             apk --update-cache add python3 py3-pip alpine-sdk
             sudo pip3 install awscli --upgrade
             sudo aws --version
-  init:
+  install_tfnotify:
     steps:
       - run:
-          name: terraform init
+          name: install tfnotify
           command: |
-            sh ./bin/assume-role.sh
-            source aws-env.sh
-            cd ./src/tf
-            terraform init -input=false
+            apk --update-cache add go libc-dev
+            go get -u -v github.com/mercari/tfnotify
   validate:
     steps:
       - run:
           name: terraform validate
           command: |
             cd ./src/tf
+            terraform init -backend=false
             terraform validate
-  plan:
+  int_and_plan:
     steps:
       - run:
           name: terraform plan
@@ -39,6 +38,7 @@ commands:
             sh ./bin/assume-role.sh
             source aws-env.sh
             cd ./src/tf
+            terraform init -input=false
             rm -f plan.out
             terraform plan -out=plan.out
   apply:
@@ -52,23 +52,11 @@ commands:
             terraform apply -auto-approve plan.out
 
 jobs:
-  checkout:
+  checkout_code:
     executor: 
       name: default
     steps:
       - checkout
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
-  init:
-    executor: 
-      name: default
-    steps:
-      - attach_workspace:
-          at: .
-      - install_awscli
-      - init
       - persist_to_workspace:
           root: .
           paths:
@@ -80,18 +68,32 @@ jobs:
       - attach_workspace:
           at: .
       - validate
-  plan:
+  int_and_plan:
     executor: 
       name: default
     steps:
       - attach_workspace:
           at: .
       - install_awscli
-      - plan
+      - int_and_plan
       - persist_to_workspace:
           root: .
           paths:
             - .
+  notify_before_apply:
+    executor: 
+      name: default
+    steps:
+      - attach_workspace:
+          at: .
+      - install_tfnotify
+      - run:
+          name: notify plan result to slack
+          command: |
+            cd ./src/tf
+            cat plan.out | tfnotify --config .tfnotify/slack.yml plan \
+            --title "以下のplan結果が反映されます。" \
+            --message "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
   apply:
     executor: 
       name: default
@@ -105,21 +107,21 @@ workflows:
   version: 2
   build:
     jobs:
-      - checkout
-      - init:
-          requires:
-            - checkout
-          context: TERRAFORM-CI-DEMO
-      - validate:
-          requires:
-            - init
-      - plan:
+      - checkout_code
+      - validate
+      - int_and_plan:
           requires:
             - validate
           context: TERRAFORM-CI-DEMO
+      - notify_before_apply:
+          requires:
+            - int_and_plan
+          context:
+            - TERRAFORM-CI-DEMO
+            - SLACK_INTEGRATION
       - hold_apply:
           requires:
-            - plan
+            - notify_before_apply
           type: approval
           filters:
             branches:

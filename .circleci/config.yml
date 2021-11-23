@@ -20,9 +20,9 @@ commands:
       - run:
           name: install tfnotify
           command: |
-            apk update && apk add --no-cache go libc-dev
-            go version
-            go get -u -v github.com/mercari/tfnotify
+            wget https://github.com/mercari/tfnotify/releases/download/v0.7.0/tfnotify_linux_amd64.tar.gz
+            tar xzf tfnotify_linux_amd64.tar.gz
+            mv tfnotify /usr/local/bin/
   validate:
     steps:
       - run:
@@ -40,8 +40,8 @@ commands:
             source aws-env.sh
             cd ./src/tf
             terraform init -input=false
-            rm -f plan.out
-            terraform plan -out=plan.out
+            rm -f plan.out plan_notify.out
+            terraform plan -out=plan.out | tee plan_notify.out
   apply:
     steps:
       - run:
@@ -92,7 +92,7 @@ jobs:
           name: notify plan result to slack
           command: |
             cd ./src/tf
-            cat plan.out | tfnotify --config .tfnotify/slack.yml plan \
+            cat plan_notify.out | tfnotify --config ../../tfnotify/slack.yml plan \
             --title "以下のplan結果が反映されます。" \
             --message "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
   apply:

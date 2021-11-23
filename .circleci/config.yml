@@ -20,7 +20,8 @@ commands:
       - run:
           name: install tfnotify
           command: |
-            apk --update-cache add go libc-dev
+            apk --update add go libc-dev
+            go version
             go get -u -v github.com/mercari/tfnotify
   validate:
     steps:

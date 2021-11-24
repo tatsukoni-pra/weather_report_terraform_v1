@@ -87,8 +87,20 @@ jobs:
       - attach_workspace:
           at: .
       - install_awscli
-      - int_and_plan
-      - slack_notify
+      - install_tfnotify
+      # - int_and_plan
+      - run:
+          name: notify plan result to slack
+          command: |
+            sh ./bin/assume-role.sh
+            source aws-env.sh
+            cd ./src/tf
+            terraform init -input=false
+            rm -f plan.out plan_notify.out
+            terraform plan -out=plan.out | tfnotify --config ../../.tfnotify/slack.yml plan \
+            --title "以下のplan結果が反映されます。" \
+            --message "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
+      # - slack_notify
       - persist_to_workspace:
           root: .
           paths:
@@ -130,25 +142,25 @@ workflows:
           context: 
             - TERRAFORM-CI-DEMO
             - SLACK_INTEGRATION
-      - notify_before_apply:
-          requires:
-            - int_and_plan
-          context:
-            - TERRAFORM-CI-DEMO
-            - SLACK_INTEGRATION
-      - hold_apply:
-          requires:
-            - notify_before_apply
-          type: approval
-          filters:
-            branches:
-              only:
-                - "main"
-      - apply:
-          requires:
-            - hold_apply
-          context: TERRAFORM-CI-DEMO
-          filters:
-            branches:
-              only:
-                - "main"
+      # - notify_before_apply:
+      #     requires:
+      #       - int_and_plan
+      #     context:
+      #       - TERRAFORM-CI-DEMO
+      #       - SLACK_INTEGRATION
+      # - hold_apply:
+      #     requires:
+      #       - notify_before_apply
+      #     type: approval
+      #     filters:
+      #       branches:
+      #         only:
+      #           - "main"
+      # - apply:
+      #     requires:
+      #       - hold_apply
+      #     context: TERRAFORM-CI-DEMO
+      #     filters:
+      #       branches:
+      #         only:
+      #           - "main"

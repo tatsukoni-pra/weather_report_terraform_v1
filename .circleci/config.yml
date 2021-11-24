@@ -127,7 +127,9 @@ workflows:
       - int_and_plan:
           requires:
             - validate
-          context: TERRAFORM-CI-DEMO
+          context: 
+            - TERRAFORM-CI-DEMO
+            - SLACK_INTEGRATION
       - notify_before_apply:
           requires:
             - int_and_plan

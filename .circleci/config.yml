@@ -130,9 +130,7 @@ workflows:
       - notify_before_apply:
           requires:
             - int_and_plan
-          context:
-            - TERRAFORM-CI-DEMO
-            - SLACK_INTEGRATION
+          context: TERRAFORM-CI-DEMO
       - hold_apply:
           requires:
             - notify_before_apply

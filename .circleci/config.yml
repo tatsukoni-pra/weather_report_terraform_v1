@@ -103,7 +103,9 @@ jobs:
           name: notify plan result to slack
           command: |
             cd ./src/tf
-            cat plan_notify.out | tfnotify --config ../../.tfnotify/slack.yml plan --title "以下のplan結果が反映されます。" --message "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
+            cat plan_notify.out | tfnotify --config ../../.tfnotify/slack.yml plan \
+            --title "以下のplan結果が反映されます。" \
+            --message "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
   apply:
     executor: 
       name: default
@@ -124,9 +126,7 @@ workflows:
       - int_and_plan:
           requires:
             - validate
-          context: 
-            - TERRAFORM-CI-DEMO
-            - SLACK_INTEGRATION
+          context: TERRAFORM-CI-DEMO
       - notify_before_apply:
           requires:
             - int_and_plan

@@ -87,7 +87,6 @@ jobs:
       - attach_workspace:
           at: .
       - install_awscli
-      - install_tfnotify
       - int_and_plan
       - persist_to_workspace:
           root: .

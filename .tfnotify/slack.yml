@@ -2,7 +2,7 @@
 ci: circleci
 notifier:
   slack:
-    token: $SLACK_ACCESS_TOKEN
+    token: $SLACK_TOKEN
     channel: $SLACK_DEFAULT_CHANNEL
     bot: $SLACK_BOT_NAME
 terraform:

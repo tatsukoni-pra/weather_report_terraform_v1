@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  slack: circleci/slack@4.4.4
+
 executors:
   default:
     docker:
@@ -51,6 +54,14 @@ commands:
             source aws-env.sh
             cd ./src/tf
             terraform apply -auto-approve plan.out
+  slack_notify:
+    steps:
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
 
 jobs:
   checkout_code:
@@ -77,6 +88,7 @@ jobs:
           at: .
       - install_awscli
       - int_and_plan
+      - slack_notify
       - persist_to_workspace:
           root: .
           paths:

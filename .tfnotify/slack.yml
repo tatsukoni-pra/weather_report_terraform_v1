@@ -4,7 +4,7 @@ notifier:
   slack:
     token: $SLACK_ACCESS_TOKEN
     channel: $SLACK_DEFAULT_CHANNEL
-    bot: "@circleci"
+    bot: $SLACK_BOT_NAME
 terraform:
   plan:
     template: |

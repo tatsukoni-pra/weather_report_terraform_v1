@@ -6,9 +6,9 @@ notifier:
     channel: $SLACK_CHANNEL_ID
     bot: $SLACK_BOT_NAME
 terraform:
+  use_raw_output: true
   plan:
     template: |
-      {{ .Title }}
       {{ .Message }}
       {{ .Link }}
       {{if .Result}}

@@ -104,8 +104,8 @@ jobs:
           command: |
             cd ./src/tf
             cat plan_notify.out | tfnotify --config ../../.tfnotify/slack.yml plan \
-            --title "以下のplan結果が反映されます。" \
-            --message "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
+            --title "test" \
+            --message "test"
   apply:
     executor: 
       name: default

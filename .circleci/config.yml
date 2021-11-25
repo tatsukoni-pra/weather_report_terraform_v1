@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  slack: circleci/slack@4.4.4
+  slack: circleci/slack@4.5.0
 
 executors:
   default:
@@ -18,14 +18,6 @@ commands:
             apk --update-cache add python3 py3-pip alpine-sdk
             sudo pip3 install awscli --upgrade
             sudo aws --version
-  install_tfnotify:
-    steps:
-      - run:
-          name: install tfnotify
-          command: |
-            wget https://github.com/mercari/tfnotify/releases/download/v0.7.0/tfnotify_linux_amd64.tar.gz
-            tar xzf tfnotify_linux_amd64.tar.gz
-            mv tfnotify /usr/local/bin/
   validate:
     steps:
       - run:
@@ -44,7 +36,7 @@ commands:
             cd ./src/tf
             terraform init -input=false
             rm -f plan.out plan_notify.out
-            terraform plan -out=plan.out | tee plan_notify.out
+            terraform plan -out=plan.out
   apply:
     steps:
       - run:
@@ -54,14 +46,6 @@ commands:
             source aws-env.sh
             cd ./src/tf
             terraform apply -auto-approve plan.out
-  slack_notify:
-    steps:
-      - slack/notify:
-          event: pass
-          template: basic_success_1
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
 
 jobs:
   checkout_code:
@@ -88,24 +72,16 @@ jobs:
           at: .
       - install_awscli
       - int_and_plan
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
       - persist_to_workspace:
           root: .
           paths:
             - .
-  notify_before_apply:
-    executor: 
-      name: default
-    steps:
-      - attach_workspace:
-          at: .
-      - install_tfnotify
-      - run:
-          name: notify plan result to slack
-          command: |
-            cd ./src/tf
-            cat plan_notify.out | tfnotify --config ../../.tfnotify/slack.yml plan \
-            --title "以下のplan結果が反映されます。" \
-            --message "https://circleci.com/workflow-run/${CIRCLE_WORKFLOW_ID}"
   apply:
     executor: 
       name: default
@@ -114,6 +90,12 @@ jobs:
           at: .
       - install_awscli
       - apply
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
 
 workflows:
   version: 2
@@ -127,13 +109,18 @@ workflows:
           requires:
             - validate
           context: TERRAFORM-CI-DEMO
-      - notify_before_apply:
+      - slack/on-hold:
+          context: SLACK_INTEGRATION
           requires:
             - int_and_plan
-          context: TERRAFORM-CI-DEMO
+          filters:
+            branches:
+              ignore:
+                - /.*/
       - hold_apply:
           requires:
-            - notify_before_apply
+            - int_and_plan
+            - slack/on-hold
           type: approval
           filters:
             branches:
@@ -142,7 +129,9 @@ workflows:
       - apply:
           requires:
             - hold_apply
-          context: TERRAFORM-CI-DEMO
+          context:
+            - TERRAFORM-CI-DEMO
+            - SLACK_INTEGRATION
           filters:
             branches:
               only:

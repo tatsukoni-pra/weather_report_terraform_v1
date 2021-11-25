@@ -1,0 +1,21 @@
+---
+ci: circleci
+notifier:
+  slack:
+    token: $SLACK_TOKEN
+    channel: $SLACK_CHANNEL_ID
+    bot: $SLACK_BOT_NAME
+terraform:
+  use_raw_output: true
+  plan:
+    template: |
+      {{ .Message }}
+      {{ .Link }}
+      {{if .Result}}
+      ```
+      {{ .Result }}
+      ```
+      {{end}}
+      ```
+      {{ .Body }}
+      ```

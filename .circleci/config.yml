@@ -81,7 +81,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "(TZ=Asia/Tokyo date +'%Y/%m/%d')本番リリースに成功しました:クラッカー:"
+                    "text": "$(TZ=Asia/Tokyo date +'%Y/%m/%d')本番リリースに成功しました:クラッカー:"
                   }
                 },
                 {
@@ -95,7 +95,6 @@ jobs:
                 }
               ]
             }
-          template: success_tagged_deploy_1
       - slack/notify:
           event: fail
           template: basic_fail_1

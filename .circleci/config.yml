@@ -66,7 +66,7 @@ commands:
                   "fields": [
                     {
                       "type": "mrkdwn",
-                      "text": "*Project Link:*\n${CIRCLE_REPOSITORY_URL}"
+                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
                     }
                   ]
                 }
@@ -128,8 +128,6 @@ jobs:
           at: .
       - install_awscli
       - int_and_plan
-      - notify_slack_deploy_pass
-      - notify_slack_deploy_fail
       - persist_to_workspace:
           root: .
           paths:
@@ -142,12 +140,8 @@ jobs:
           at: .
       - install_awscli
       - apply
-      - slack/notify:
-          event: pass
-          template: success_tagged_deploy_1
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
+      - notify_slack_deploy_pass
+      - notify_slack_deploy_fail
 
 workflows:
   version: 2
@@ -160,9 +154,7 @@ workflows:
       - int_and_plan:
           requires:
             - validate
-          context:
-            - TERRAFORM-CI-DEMO
-            - SLACK_INTEGRATION
+          context: TERRAFORM-CI-DEMO
       - slack/on-hold:
           context: SLACK_INTEGRATION
           requires:

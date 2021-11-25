@@ -46,6 +46,62 @@ commands:
             source aws-env.sh
             cd ./src/tf
             terraform apply -auto-approve plan.out
+  # notify to slack
+  notify_slack_deploy_pass:
+    steps:
+      - slack/notify:
+          event: pass
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": ":tada: $(TZ=Asia/Tokyo date +'%Y/%m/%d') インフラ本番反映が完了しました :tada:"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
+                    }
+                  ]
+                }
+              ]
+            }
+  notify_slack_deploy_fail:
+    steps:
+      - slack/notify:
+          event: fail
+          mentions: "@tatsukoni1818"
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": ":small_red_triangle: インフラ本番反映に失敗しました。詳細を確認してください :small_red_triangle:"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Job"
+                      },
+                      "url": "${CIRCLE_BUILD_URL}"
+                    }
+                  ]
+                }
+              ]
+            }
 
 jobs:
   checkout_code:
@@ -72,32 +128,8 @@ jobs:
           at: .
       - install_awscli
       - int_and_plan
-      - slack/notify:
-          event: pass
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "## :tada: $(TZ=Asia/Tokyo date +'%Y/%m/%d') 本番デプロイが完了しました :tada:"
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
-                    }
-                  ]
-                }
-              ]
-            }
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
+      - notify_slack_deploy_pass
+      - notify_slack_deploy_fail
       - persist_to_workspace:
           root: .
           paths:

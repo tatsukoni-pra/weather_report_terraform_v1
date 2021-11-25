@@ -74,6 +74,27 @@ jobs:
       - int_and_plan
       - slack/notify:
           event: pass
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "(TZ=Asia/Tokyo date +'%Y/%m/%d')本番リリースに成功しました:クラッカー:"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
+                    }
+                  ]
+                }
+              ]
+            }
           template: success_tagged_deploy_1
       - slack/notify:
           event: fail

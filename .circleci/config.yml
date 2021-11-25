@@ -81,7 +81,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "$(TZ=Asia/Tokyo date +'%Y/%m/%d')本番リリースに成功しました:クラッカー:"
+                    "text": "## :tada: $(TZ=Asia/Tokyo date +'%Y/%m/%d') 本番デプロイが完了しました :tada:"
                   }
                 },
                 {
@@ -135,10 +135,7 @@ workflows:
           context: SLACK_INTEGRATION
           requires:
             - int_and_plan
-          filters:
-            branches:
-              ignore:
-                - /.*/
+          branch_pattern: "main"
       - hold_apply:
           requires:
             - int_and_plan

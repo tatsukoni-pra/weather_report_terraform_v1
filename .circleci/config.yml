@@ -66,7 +66,7 @@ commands:
                   "fields": [
                     {
                       "type": "mrkdwn",
-                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
+                      "text": "*Project Link:*\n${CIRCLE_REPOSITORY_URL}"
                     }
                   ]
                 }

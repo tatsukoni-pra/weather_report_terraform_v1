@@ -35,7 +35,7 @@ commands:
             source aws-env.sh
             cd ./src/tf
             terraform init -input=false
-            rm -f plan.out plan_notify.out
+            rm -f plan.out
             terraform plan -out=plan.out
   apply:
     steps:
@@ -108,7 +108,9 @@ workflows:
       - int_and_plan:
           requires:
             - validate
-          context: TERRAFORM-CI-DEMO
+          context:
+            - TERRAFORM-CI-DEMO
+            - SLACK_INTEGRATION
       - slack/on-hold:
           context: SLACK_INTEGRATION
           requires:

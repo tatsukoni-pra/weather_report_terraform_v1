@@ -3,7 +3,6 @@ module "vpc" {
   service_name = var.service_name
 }
 
-
 # module "rds" {
 #   source                       = "../modules/rds"
 #   service_name                 = var.service_name

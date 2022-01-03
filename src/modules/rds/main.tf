@@ -4,14 +4,14 @@ resource "aws_rds_cluster" "service_cluster" {
   engine_version                  = local.engine_version
   availability_zones              = local.availability_zones
   db_subnet_group_name            = aws_db_subnet_group.service_cluster.name
-  db_cluster_parameter_group_name = "${var.service_name}-dbcluster-parameter"
+  db_cluster_parameter_group_name = local.cluster_parameter_group.name
   database_name                   = var.database_name
   master_username                 = data.aws_ssm_parameter.db_master_username.value
   master_password                 = data.aws_ssm_parameter.db_master_password.value
   backup_retention_period         = local.backup_retention_period
   port                            = local.port
   preferred_maintenance_window    = local.preferred_maintenance_window
-  skip_final_snapshot             = false
+  skip_final_snapshot             = true
   storage_encrypted               = true
   kms_key_id                      = aws_kms_key.rds_storage.arn
   deletion_protection             = false
@@ -21,10 +21,10 @@ resource "aws_rds_cluster" "service_cluster" {
 
   depends_on = [aws_db_subnet_group.service_cluster]
   lifecycle {
-    ignore_changes = [master_password, availability_zones, tags["Schedule"]]
+    ignore_changes = [master_password, availability_zones]
   }
   tags = {
-    Name        = "${var.service_name}-rds"
+    Name = "${var.service_name}-rds_cluster"
   }
 }
 
@@ -38,12 +38,12 @@ resource "aws_rds_cluster_instance" "service_db" {
   performance_insights_enabled = false
   engine                       = local.engine
   engine_version               = local.engine_version
-  db_parameter_group_name      = "${var.service_name}-db-parameter"
+  db_parameter_group_name      = local.db_parameter_group.name
   auto_minor_version_upgrade   = true
   apply_immediately            = true
 
   tags = {
-    Name        = "${var.service_name}-rds"
+    Name = "${var.service_name}-rds_cluster_instance"
   }
 }
 
@@ -54,7 +54,7 @@ resource "aws_kms_key" "rds_storage" {
   enable_key_rotation     = true
 
   tags = {
-    Name        = "${var.service_name}-rds-kms"
+    Name = "${var.service_name}-rds-kms"
   }
 }
 
@@ -64,7 +64,7 @@ resource "aws_db_subnet_group" "service_cluster" {
   subnet_ids  = var.private_sub
 
   tags = {
-    Name        = var.service_name
+    Name = "${var.service_name}-db-subnet-group"
   }
 }
 
@@ -74,15 +74,15 @@ resource "aws_security_group" "service_db_security_group" {
   description = "${var.service_name} rds sg"
 
   tags = {
-    Name        = "${var.service_name}-rds"
+    Name = "${var.service_name}-rds-sg"
   }
 }
 
 resource "aws_security_group_rule" "vpc_cidr_ingress" {
   description       = "VPC"
   type              = "ingress"
-  from_port         = var.port
-  to_port           = var.port
+  from_port         = local.port
+  to_port           = local.port
   protocol          = "tcp"
   cidr_blocks       = [var.vpc_cidr_block]
   security_group_id = aws_security_group.service_db_security_group.id
@@ -97,13 +97,10 @@ resource "aws_security_group_rule" "service_db_egress" {
   security_group_id = aws_security_group.service_db_security_group.id
 }
 
-resource "aws_rds_cluster_parameter_group" "default" {
-  name   = var.cluster_parameter_group
-  family = var.cluster_parameter_family
-  tags = {
-    service     = var.service_name
-    environment = var.env
-  }
+resource "aws_rds_cluster_parameter_group" "cluster_parameter_group" {
+  name   = local.cluster_parameter_group.name
+  family = local.cluster_parameter_group.family
+
   parameter {
     name  = "character_set_client"
     value = "utf8mb4"
@@ -140,14 +137,16 @@ resource "aws_rds_cluster_parameter_group" "default" {
     name  = "time_zone"
     value = "Asia/Tokyo"
   }
+
+  tags = {
+    Name = local.cluster_parameter_group.name
+  }
 }
 
 resource "aws_db_parameter_group" "db_parameter_group" {
-  name   = var.parameter_group
-  family = var.parameter_family
+  name   = local.db_parameter_group.name
+  family = local.db_parameter_group.family
   tags = {
-    Name        = "${var.service_name}-db_paramter_group"
-    Environment = var.env
-    Service     = var.service_name
+    Name = local.db_parameter_group.name
   }
 }

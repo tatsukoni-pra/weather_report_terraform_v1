@@ -20,6 +20,10 @@ variable "cluster_id" {
 
 locals {
   engine_family = "MYSQL"
+  idle_client_timeout = 1800
+  connection_borrow_timeout    = 120
+  max_connections_percent      = 50
+  max_idle_connections_percent = 10
 }
 
 data "aws_ssm_parameter" "db_username" {

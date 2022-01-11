@@ -2,7 +2,7 @@ resource "aws_db_proxy" "rds_proxy" {
   name                   = "${var.service_name}-rds-proxy"
   debug_logging          = false
   engine_family          = local.engine_family
-  idle_client_timeout    = 1800
+  idle_client_timeout    = local.idle_client_timeout
   require_tls            = false
   role_arn               = aws_iam_role.rds_proxy_role.arn
   vpc_security_group_ids = [aws_security_group.rds_proxy_sg.id]
@@ -23,9 +23,9 @@ resource "aws_db_proxy_default_target_group" "rds_proxy" {
   db_proxy_name = aws_db_proxy.rds_proxy.name
 
   connection_pool_config {
-    connection_borrow_timeout    = 120
-    max_connections_percent      = 70
-    max_idle_connections_percent = 50
+    connection_borrow_timeout    = local.connection_borrow_timeout
+    max_connections_percent      = local.max_connections_percent
+    max_idle_connections_percent = local.max_idle_connections_percent
   }
 }
 
@@ -40,7 +40,11 @@ resource "aws_db_proxy_target" "rds_proxy" {
 # RDS Proxyから接続するDB情報
 ###############################################
 resource "aws_secretsmanager_secret" "rds_proxy_connection" {
-  name = "${var.service_name}-rds_proxy-sercet"
+  name = "${var.service_name}-rds_proxy-sercet-v6"
+
+  tags = {
+    Name = "${var.service_name}-rds_proxy-sercet-v6"
+  }
 }
 
 resource "aws_secretsmanager_secret_version" "rds_proxy_connection" {
@@ -53,6 +57,10 @@ resource "aws_secretsmanager_secret_version" "rds_proxy_connection" {
     port : 3306
     dbClusterIdentifier : var.cluster_id
   })
+
+  lifecycle {
+    ignore_changes = [secret_string]
+  }
 }
 
 ###############################################

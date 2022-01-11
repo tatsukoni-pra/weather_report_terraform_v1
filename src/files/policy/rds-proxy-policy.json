@@ -6,12 +6,12 @@
       "Action": [
         "secretsmanager:GetSecretValue"
       ],
-      "Resource": "arn:aws:secretsmanager:*:*:*"
+      "Resource": "arn:aws:secretsmanager:*:083636136646:*"
     },
     {
         "Effect": "Allow",
         "Action": "kms:Decrypt",
-        "Resource": "arn:aws:kms:*:*:*",
+        "Resource": "arn:aws:kms:*:083636136646:*",
         "Condition": {
             "StringEquals": {
                 "kms:ViaService": "secretsmanager.ap-northeast-1.amazonaws.com"

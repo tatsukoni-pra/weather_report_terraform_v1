@@ -155,27 +155,27 @@ workflows:
           requires:
             - validate
           context: TERRAFORM-CI-DEMO
-      - slack/on-hold:
-          context: SLACK_INTEGRATION
-          requires:
-            - int_and_plan
-          branch_pattern: "main"
-      - hold_apply:
-          requires:
-            - int_and_plan
-            - slack/on-hold
-          type: approval
-          filters:
-            branches:
-              only:
-                - "main"
-      - apply:
-          requires:
-            - hold_apply
-          context:
-            - TERRAFORM-CI-DEMO
-            - SLACK_INTEGRATION
-          filters:
-            branches:
-              only:
-                - "main"
+      # - slack/on-hold:
+      #     context: SLACK_INTEGRATION
+      #     requires:
+      #       - int_and_plan
+      #     branch_pattern: "main"
+      # - hold_apply:
+      #     requires:
+      #       - int_and_plan
+      #       - slack/on-hold
+      #     type: approval
+      #     filters:
+      #       branches:
+      #         only:
+      #           - "main"
+      # - apply:
+      #     requires:
+      #       - hold_apply
+      #     context:
+      #       - TERRAFORM-CI-DEMO
+      #       - SLACK_INTEGRATION
+      #     filters:
+      #       branches:
+      #         only:
+      #           - "main"

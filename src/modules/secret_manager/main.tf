@@ -3,6 +3,7 @@
 # シークレットのタイプは、secret_stringで指定されるkey種類により自動的に変わる
 ####################################################################
 // Amazon RDS データベースの認証情報
+// secret_string 全てのkeyが揃っていないと、Amazon RDS用にならない
 resource "aws_secretsmanager_secret" "rds_connection" {
   name = "${var.service_name}-rds-secret-v1"
 
@@ -19,7 +20,7 @@ resource "aws_secretsmanager_secret_version" "rds_connection" {
     engine : "mysql"
     host : "dummyString"
     port : 3306
-    dbClusterIdentifier : var.cluster_id # これがあると、type:データベースの認証情報 になるみたい
+    dbClusterIdentifier : var.cluster_id
   })
 
   lifecycle {

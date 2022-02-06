@@ -42,3 +42,9 @@ module "lambda" {
   private_sub    = [module.vpc.private_subnet_1a_id, module.vpc.private_subnet_1c_id]
   vpc_cidr_block = module.vpc.cidr_block
 }
+
+module "secret_manager" {
+  source       = "../modules/secret_manager"
+  service_name = var.service_name
+  cluster_id   = module.rds.cluster_id
+}

@@ -58,6 +58,21 @@ resource "aws_vpc_endpoint" "ecr_dkr" {
   }
 }
 
+resource "aws_vpc_endpoint" "secretsmanager" {
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.ap-northeast-1.secretsmanager"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = var.private_sub
+  security_group_ids = [
+    aws_security_group.endpoint_sg.id
+  ]
+
+  tags = {
+    Name = "${var.service_name}-secretsmanager-endpoint"
+  }
+}
+
 ###############################################
 # Security Group
 ###############################################

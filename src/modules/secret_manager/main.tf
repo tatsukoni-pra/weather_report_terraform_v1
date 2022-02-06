@@ -19,7 +19,7 @@ resource "aws_secretsmanager_secret_version" "rds_connection" {
     engine : "mysql"
     host : "dummyString"
     port : 3306
-    dbClusterIdentifier : var.cluster_id
+    dbClusterIdentifier : var.cluster_id # これがあると、type:データベースの認証情報 になるみたい
   })
 
   lifecycle {

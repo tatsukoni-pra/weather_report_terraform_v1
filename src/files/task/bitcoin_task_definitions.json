@@ -1,0 +1,40 @@
+[
+    {
+      "name": "python-app",
+      "image":"${account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/tatsukoni-demo-bitcoin-v1:latest",
+      "essential": true,
+      "cpu": 256,
+      "memory": 512,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-datetime-format": "%Y-%m-%d %H:%M:%S",
+          "awslogs-group": "/ecs/bitcoin-task"
+        }
+      },
+      "secrets": [
+        {
+          "name": "API_ENDPOINT",
+          "valueFrom": "arn:aws:ssm:ap-northeast-1:${account_id}:parameter/ecs/bitcoin/API_ENDPOINT"
+        },
+        {
+          "name": "API_KEY",
+          "valueFrom": "arn:aws:ssm:ap-northeast-1:${account_id}:parameter/ecs/bitcoin/API_KEY"
+        },
+        {
+          "name": "API_SECRET",
+          "valueFrom": "arn:aws:ssm:ap-northeast-1:${account_id}:parameter/ecs/bitcoin/API_SECRET"
+        },
+        {
+          "name": "REALTIME_API_CHANNEL",
+          "valueFrom": "arn:aws:ssm:ap-northeast-1:${account_id}:parameter/ecs/bitcoin/REALTIME_API_CHANNEL"
+        },
+        {
+          "name": "REALTIME_API_ENDPOINT",
+          "valueFrom": "arn:aws:ssm:ap-northeast-1:${account_id}:parameter/ecs/bitcoin/REALTIME_API_ENDPOINT"
+        }
+      ]
+    }
+]

@@ -143,39 +143,39 @@ jobs:
       - notify_slack_deploy_pass
       - notify_slack_deploy_fail
 
-workflows:
-  version: 2
-  build:
-    jobs:
-      - checkout_code
-      - validate:
-          requires:
-            - checkout_code
-      - int_and_plan:
-          requires:
-            - validate
-          context: TERRAFORM-CI-DEMO
-      # - slack/on-hold:
-      #     context: SLACK_INTEGRATION
-      #     requires:
-      #       - int_and_plan
-      #     branch_pattern: "main"
-      # - hold_apply:
-      #     requires:
-      #       - int_and_plan
-      #       - slack/on-hold
-      #     type: approval
-      #     filters:
-      #       branches:
-      #         only:
-      #           - "main"
-      # - apply:
-      #     requires:
-      #       - hold_apply
-      #     context:
-      #       - TERRAFORM-CI-DEMO
-      #       - SLACK_INTEGRATION
-      #     filters:
-      #       branches:
-      #         only:
-      #           - "main"
+# workflows:
+#   version: 2
+#   build:
+#     jobs:
+#       - checkout_code
+#       - validate:
+#           requires:
+#             - checkout_code
+#       - int_and_plan:
+#           requires:
+#             - validate
+#           context: TERRAFORM-CI-DEMO
+#       - slack/on-hold:
+#           context: SLACK_INTEGRATION
+#           requires:
+#             - int_and_plan
+#           branch_pattern: "main"
+#       - hold_apply:
+#           requires:
+#             - int_and_plan
+#             - slack/on-hold
+#           type: approval
+#           filters:
+#             branches:
+#               only:
+#                 - "main"
+#       - apply:
+#           requires:
+#             - hold_apply
+#           context:
+#             - TERRAFORM-CI-DEMO
+#             - SLACK_INTEGRATION
+#           filters:
+#             branches:
+#               only:
+#                 - "main"

@@ -13,3 +13,7 @@ variable "private_sub" {
 variable "vpc_cidr_block" {
   description = "VPC Cidr block"
 }
+
+variable "private_route_table_id" {
+  description = "Private route table id"
+}

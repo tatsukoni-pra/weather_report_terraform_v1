@@ -151,10 +151,10 @@ workflows:
       - validate:
           requires:
             - checkout_code
-      - int_and_plan:
-          requires:
-            - validate
-          context: TERRAFORM-CI-DEMO
+      # - int_and_plan:
+      #     requires:
+      #       - validate
+      #     context: TERRAFORM-CI-DEMO
       # - slack/on-hold:
       #     context: SLACK_INTEGRATION
       #     requires:

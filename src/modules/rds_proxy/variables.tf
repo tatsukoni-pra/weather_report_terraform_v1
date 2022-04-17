@@ -18,9 +18,13 @@ variable "cluster_id" {
   description = "Cluster Id"
 }
 
+variable "private_zone_id" {
+  description = "Route53 Private Host Zone Id"
+}
+
 locals {
-  engine_family = "MYSQL"
-  idle_client_timeout = 1800
+  engine_family                = "MYSQL"
+  idle_client_timeout          = 1800
   connection_borrow_timeout    = 120
   max_connections_percent      = 50
   max_idle_connections_percent = 10

@@ -35,6 +35,19 @@ resource "aws_db_proxy_target" "rds_proxy" {
   target_group_name     = aws_db_proxy_default_target_group.rds_proxy.name
 }
 
+resource "aws_db_proxy_endpoint" "read_only" {
+  db_proxy_name          = aws_db_proxy.rds_proxy.name
+  db_proxy_endpoint_name = "${var.service_name}-rds-proxy-readonly"
+  vpc_security_group_ids = [aws_security_group.rds_proxy_sg.id]
+  vpc_subnet_ids         = var.private_sub
+  target_role            = "READ_ONLY"
+
+  depends_on = [aws_db_proxy.rds_proxy]
+  tags = {
+    Name = "${var.service_name}-rds-proxy-readonly"
+  }
+}
+
 ###############################################
 # Secret Manager
 # RDS Proxyから接続するDB情報
@@ -112,4 +125,23 @@ resource "aws_security_group_rule" "rds_proxy_sg_egress" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.rds_proxy_sg.id
   depends_on        = [aws_security_group.rds_proxy_sg]
+}
+
+###############################################
+# Route53
+###############################################
+resource "aws_route53_record" "rds_proxy_write" {
+  zone_id = var.private_zone_id
+  name    = "${var.service_name}-rds-proxy-write"
+  type    = "CNAME"
+  ttl     = "300"
+  records = [aws_db_proxy.rds_proxy.endpoint]
+}
+
+resource "aws_route53_record" "rds_proxy_read" {
+  zone_id = var.private_zone_id
+  name    = "${var.service_name}-rds-proxy-read"
+  type    = "CNAME"
+  ttl     = "300"
+  records = [aws_db_proxy_endpoint.read_only.endpoint]
 }

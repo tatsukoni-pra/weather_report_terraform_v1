@@ -73,3 +73,8 @@ module "lambda" {
   private_sub    = [module.vpc.private_subnet_1a_id, module.vpc.private_subnet_1c_id]
   vpc_cidr_block = module.vpc.cidr_block
 }
+
+module "codeBuild_demo" {
+  source       = "../modules/codeBuild_demo"
+  service_name = var.service_name
+}
